@@ -1,0 +1,29 @@
+# Render Blueprint: creates the web service and a PostgreSQL database.
+# Render dashboard -> New -> Blueprint -> select this repo.
+services:
+  - type: web
+    name: tradelens
+    runtime: node
+    plan: free
+    region: singapore # keep the same region as the database
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: tradelens-db
+          property: connectionString
+      - key: NEXTAUTH_SECRET
+        generateValue: true
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+
+databases:
+  - name: tradelens-db
+    plan: free
+    region: singapore
+    databaseName: tradelens
+    user: tradelens
